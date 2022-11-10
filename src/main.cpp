@@ -15,28 +15,22 @@ void webSocketCallback(uint8_t num, WStype_t type, uint8_t * payload, size_t len
 void setup() {
     Serial.begin(9600);
 
-    WiFi.mode(WIFI_MODE_STA);
-    WiFi.begin("Roball");
+    WiFi.softAP("Roball", NULL);
 
     Serial.println("Opened Access-Point \"Roball\"");
 
-    motor1.setupMotor(12, 14, 15);
-    motor2.setupMotor(16, 7, 8);
+    motor1 = AsyncMotor(14, 13, 12, 0);
+    motor2 = AsyncMotor(15, 16, 17, 1);
 
     motor1.setSpeed(120);
     motor1.setDirection(true);
     motor2.setSpeed(120);
     motor2.setDirection(true);
 
-    pinMode(OUTPUT, 12);
-    pinMode(OUTPUT, 14);
-    pinMode(OUTPUT, 15);
-    pinMode(OUTPUT, 16);
-    pinMode(OUTPUT, 7);
-    pinMode(OUTPUT, 8);
-
     Serial.println("Motor Test started");
     delay(1250);
+    motor1.setSpeed(0);
+    motor2.setSpeed(0);
     Serial.println("Motor Test finished");
 
     webSocketsServer.begin();

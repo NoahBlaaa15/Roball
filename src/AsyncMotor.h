@@ -12,17 +12,26 @@ private:
     uint8_t enable;
     uint8_t control1;
     uint8_t control2;
+    uint8_t channel;
 public:
-    void setupMotor(uint8_t pinEnable, uint8_t pinControl1, uint8_t pinControl2) {
-        ledcSetup(0, 5000, 8);
-        ledcAttachPin(pinEnable, 0);
-        enable = pinEnable;
-
+    AsyncMotor() {
+        enable = -1;
+        control1 = -1;
+        control2 = -1;
+        channel = -1;
+    }
+    AsyncMotor(uint8_t pinEnable, uint8_t pinControl1, uint8_t pinControl2, uint8_t chanNum) {
+        pinMode(pinControl1, OUTPUT);
         control1 = pinControl1;
 
+        pinMode(pinControl2, OUTPUT);
         control2 = pinControl2;
+
+        enable = pinEnable;
+        channel = chanNum;
+        ledcSetup(channel, 1000, 8);
+        ledcAttachPin(enable, channel);
     };
-    AsyncMotor() {};
     void setSpeed(uint8_t speed);
     void setDirection(boolean dir);
 };
