@@ -9,7 +9,7 @@
  * @param speed Number between 0 and 255
  */
 void AsyncMotor::setSpeed(uint8_t speed) {
-    ledcWrite(0, speed);
+    //ledcWrite(0, speed);
 }
 
 /**
