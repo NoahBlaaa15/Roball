@@ -19,16 +19,18 @@ void setup() {
 
     Serial.println("Opened Access-Point \"Roball\"");
 
+
+    //delay(30000);
     motor1 = AsyncMotor(14, 13, 12, 0);
     motor2 = AsyncMotor(15, 16, 17, 1);
 
-    motor1.setSpeed(120);
+    motor1.setSpeed(130);
     motor1.setDirection(true);
-    motor2.setSpeed(120);
+    motor2.setSpeed(130);
     motor2.setDirection(true);
 
     Serial.println("Motor Test started");
-    delay(1250);
+    delay(1000);
     motor1.setSpeed(0);
     motor2.setSpeed(0);
     Serial.println("Motor Test finished");
@@ -48,6 +50,8 @@ void loop() {
 void webSocketCallback(uint8_t num, WStype_t type, uint8_t * payload, size_t length) {
     char* text;
     IPAddress ip;
+    int32_t speed;
+    boolean dir;
     switch(type) {
         case WStype_DISCONNECTED:
             Serial.printf("[%u] Disconnected!\n", num);
@@ -62,6 +66,16 @@ void webSocketCallback(uint8_t num, WStype_t type, uint8_t * payload, size_t len
         case WStype_TEXT:
             text = reinterpret_cast<char *>(payload);
             Serial.printf("[%u] get Text: %s\n", num, text);
+
+            speed = atoi(text);
+            dir = speed > 0;
+            speed = abs(speed);
+
+            motor1.setSpeed(map(speed, 0, 100, 0, 130));
+            motor2.setSpeed(map(speed, 0, 100, 0, 130));
+
+            motor1.setDirection(dir);
+            motor2.setDirection(dir);
             // send message to client
             // webSocket.sendTXT(num, "message here");
 
