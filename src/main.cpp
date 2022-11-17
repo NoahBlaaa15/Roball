@@ -48,10 +48,12 @@ void loop() {
 }
 
 void webSocketCallback(uint8_t num, WStype_t type, uint8_t * payload, size_t length) {
-    char* text;
+    String text;
     IPAddress ip;
-    int32_t speed;
-    boolean dir;
+    String mlsT;
+    String mrsT;
+    uint8_t mls;
+    uint8_t mrs;
     switch(type) {
         case WStype_DISCONNECTED:
             Serial.printf("[%u] Disconnected!\n", num);
@@ -65,17 +67,19 @@ void webSocketCallback(uint8_t num, WStype_t type, uint8_t * payload, size_t len
             break;
         case WStype_TEXT:
             text = reinterpret_cast<char *>(payload);
-            Serial.printf("[%u] get Text: %s\n", num, text);
+            Serial.printf("[%u] get Text: %s\n", num, text.c_str());
 
-            speed = atoi(text);
-            dir = speed > 0;
-            speed = abs(speed);
+            mlsT = text.substring(0, text.indexOf(';'));
+            mrsT = text.substring(text.indexOf(';'));
 
-            motor1.setSpeed(map(speed, 0, 100, 0, 130));
-            motor2.setSpeed(map(speed, 0, 100, 0, 130));
+            mls = mlsT.toInt();
+            mrs = mrsT.toInt();
 
-            motor1.setDirection(dir);
-            motor2.setDirection(dir);
+            motor1.setSpeed(map(abs(mls), 0, 100, 0, 130));
+            motor2.setSpeed(map(abs(mrs), 0, 100, 0, 130));
+
+            motor1.setDirection(mls >= 0);
+            motor2.setDirection(mrs >= 0);
             // send message to client
             // webSocket.sendTXT(num, "message here");
 
@@ -95,6 +99,9 @@ void webSocketCallback(uint8_t num, WStype_t type, uint8_t * payload, size_t len
         case WStype_FRAGMENT_BIN_START:
         case WStype_FRAGMENT:
         case WStype_FRAGMENT_FIN:
+        case WStype_PING:
+        case WStype_PONG:
+        default:
             break;
     }
 
