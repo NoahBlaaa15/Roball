@@ -24,9 +24,9 @@ void setup() {
     motor1 = AsyncMotor(14, 13, 12, 0);
     motor2 = AsyncMotor(15, 16, 17, 1);
 
-    motor1.setSpeed(130);
+    motor1.setSpeed(60);
     motor1.setDirection(true);
-    motor2.setSpeed(130);
+    motor2.setSpeed(60);
     motor2.setDirection(true);
 
     Serial.println("Motor Test started");
@@ -52,8 +52,8 @@ void webSocketCallback(uint8_t num, WStype_t type, uint8_t * payload, size_t len
     IPAddress ip;
     String mlsT;
     String mrsT;
-    uint8_t mls;
-    uint8_t mrs;
+    int64_t mls;
+    int64_t mrs;
     switch(type) {
         case WStype_DISCONNECTED:
             Serial.printf("[%u] Disconnected!\n", num);
@@ -70,13 +70,16 @@ void webSocketCallback(uint8_t num, WStype_t type, uint8_t * payload, size_t len
             Serial.printf("[%u] get Text: %s\n", num, text.c_str());
 
             mlsT = text.substring(0, text.indexOf(';'));
-            mrsT = text.substring(text.indexOf(';'));
+            mrsT = text.substring(text.indexOf(';')+1);
 
             mls = mlsT.toInt();
             mrs = mrsT.toInt();
 
-            motor1.setSpeed(map(abs(mls), 0, 100, 0, 130));
-            motor2.setSpeed(map(abs(mrs), 0, 100, 0, 130));
+            Serial.println("Left:" + mlsT);
+            Serial.println("Right:" + mrsT);
+
+            motor1.setSpeed(abs(mls));
+            motor2.setSpeed(abs(mrs));
 
             motor1.setDirection(mls >= 0);
             motor2.setDirection(mrs >= 0);
