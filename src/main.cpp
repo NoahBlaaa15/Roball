@@ -73,7 +73,17 @@ void webSocketCallback(uint8_t num, WStype_t type, uint8_t * payload, size_t len
             mrsT = text.substring(text.indexOf(';')+1);
 
             mls = mlsT.toInt();
+            if (mls > 5) {
+                mls = map(mls, 0, 100, 20, 255);
+            } else {
+                mls = 0;
+            }
             mrs = mrsT.toInt();
+            if (mrs > 5) {
+                mrs = map(mrs, 0, 100, 20, 255);
+            } else {
+                mrs = 0;
+            }
 
             Serial.println("Left:" + mlsT);
             Serial.println("Right:" + mrsT);
