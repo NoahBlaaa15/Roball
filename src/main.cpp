@@ -7,8 +7,11 @@
 #include "AsyncMotor.h"
 
 WebSocketsServer webSocketsServer = WebSocketsServer(81);
-AsyncMotor motor1;
-AsyncMotor motor2;
+AsyncMotor motorL;
+AsyncMotor motorR;
+
+const u_int8_t speedR = 82;
+const u_int8_t speedL = 90;
 
 void webSocketCallback(uint8_t num, WStype_t type, uint8_t * payload, size_t length);
 
@@ -21,18 +24,18 @@ void setup() {
 
 
     //delay(30000);
-    motor1 = AsyncMotor(14, 13, 12, 0);
-    motor2 = AsyncMotor(15, 16, 17, 1);
+    motorL = AsyncMotor(14, 13, 12, 0);
+    motorR = AsyncMotor(15, 16, 17, 1);
 
-    motor1.setSpeed(60);
-    motor1.setDirection(true);
-    motor2.setSpeed(60);
-    motor2.setDirection(true);
+    motorL.setSpeed(60);
+    motorL.setDirection(true);
+    motorR.setSpeed(60);
+    motorR.setDirection(true);
 
     Serial.println("Motor Test started");
     delay(1000);
-    motor1.setSpeed(0);
-    motor2.setSpeed(0);
+    motorL.setSpeed(0);
+    motorR.setSpeed(0);
     Serial.println("Motor Test finished");
 
     webSocketsServer.begin();
@@ -52,8 +55,7 @@ void webSocketCallback(uint8_t num, WStype_t type, uint8_t * payload, size_t len
     IPAddress ip;
     String mlsT;
     String mrsT;
-    int64_t mls;
-    int64_t mrs;
+    int64_t dirType;
     switch(type) {
         case WStype_DISCONNECTED:
             Serial.printf("[%u] Disconnected!\n", num);
@@ -69,22 +71,38 @@ void webSocketCallback(uint8_t num, WStype_t type, uint8_t * payload, size_t len
             text = reinterpret_cast<char *>(payload);
             Serial.printf("[%u] get Text: %s\n", num, text.c_str());
 
-            mlsT = text.substring(0, text.indexOf(';'));
-            mrsT = text.substring(text.indexOf(';')+1);
+            dirType = text.toInt();
+            switch (dirType) {
+                case 0: //Break
+                    motorL.setSpeed(0);
+                    motorR.setSpeed(0);
+                    break;
+                case 1: //UP
+                    motorL.setSpeed(speedL);
+                    motorR.setSpeed(speedR);
+                    motorR.setDirection(1);
+                    motorL.setDirection(1);
+                    break;
+                case 2: //DOWN
+                    motorL.setSpeed(speedL);
+                    motorR.setSpeed(speedR);
+                    motorR.setDirection(0);
+                    motorL.setDirection(0);
+                    break;
+                case 3: //RIGHT
+                    motorL.setSpeed(speedL);
+                    motorR.setSpeed(speedR);
+                    motorR.setDirection(0);
+                    motorL.setDirection(1);
+                    break;
+                case 4: //LEFT
+                    motorL.setSpeed(speedL);
+                    motorR.setSpeed(speedR);
+                    motorR.setDirection(1);
+                    motorL.setDirection(0);
+                    break;
 
-            mls = mlsT.toInt();
-            mls = map(mls, 0, 100, 0, 210);
-            mrs = mrsT.toInt();
-            mrs = map(mrs, 0, 100, 0, 175);
-
-            Serial.println("Left:" + mlsT);
-            Serial.println("Right:" + mrsT);
-
-            motor1.setSpeed(abs(mls));
-            motor2.setSpeed(abs(mrs));
-
-            motor1.setDirection(mls >= 0);
-            motor2.setDirection(mrs >= 0);
+            }
             // send message to client
             // webSocket.sendTXT(num, "message here");
 
